@@ -8,6 +8,7 @@ export interface WordCard {
   phonetic?: string;
   gender?: string; // 'masculine' | 'feminine' | 'plural' | 'neutral'
   nuance?: string; // Cultural context or "The Vibe Check"
+  texture?: string; // 'fur' | 'wood' | 'water' | 'plant' | 'fabric' | 'metal' | 'stone'
   createdAt: number;
 }
 
@@ -25,4 +26,5 @@ export interface GeminiWordResponse {
   phonetic: string;
   gender: string;
   nuance: string;
+  texture: string;
 }

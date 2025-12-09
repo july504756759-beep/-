@@ -20,6 +20,14 @@ export const generateWordDetails = async (word: string): Promise<GeminiWordRespo
     5. "phonetic": The IPA phonetic transcription.
     6. "gender": The grammatical gender of the word if applicable. Return exactly one of: "Masculin", "Féminin", "Pluriel", or "Neutre" (for phrases/verbs).
     7. "nuance": A "Vibe Check" or cultural context note. Explain when to use this word, its tone (formal/slang), or a fun fact. Keep it brief and interesting. (In English or Chinese).
+    8. "texture": The visual material texture that best matches this word's meaning. Choose exactly ONE from: 
+       - "fur" (for animals, pets, soft things)
+       - "wood" (for trees, furniture, solid objects)
+       - "water" (for liquids, ocean, drinks, flow)
+       - "plant" (for flowers, vegetables, nature)
+       - "fabric" (for clothes, curtains, soft materials)
+       - "metal" (for tools, technology, cars, hard objects)
+       - "stone" (default/generic/abstract concepts)
   `;
 
   const response = await ai.models.generateContent({
@@ -37,8 +45,9 @@ export const generateWordDetails = async (word: string): Promise<GeminiWordRespo
           phonetic: { type: Type.STRING },
           gender: { type: Type.STRING },
           nuance: { type: Type.STRING },
+          texture: { type: Type.STRING },
         },
-        required: ["translation", "definition", "exampleSentence", "exampleTranslation", "phonetic", "gender", "nuance"],
+        required: ["translation", "definition", "exampleSentence", "exampleTranslation", "phonetic", "gender", "nuance", "texture"],
       },
     },
   });

@@ -36,9 +36,37 @@ const getThemeForId = (id: string) => {
   return theme;
 };
 
-// SVG Noise Texture Data URI - Stronger, "Material" feel
-// Increased opacity to 0.5 and adjusted frequency for a clearer grain
-const NOISE_TEXTURE = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`;
+// --- Texture Library ---
+// Defines SVG Data URIs for different material types
+const TEXTURE_STYLES: Record<string, string> = {
+    // Default Stone/Noise - Granular
+    stone: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E")`,
+    
+    // Fur - Directional Noise (Stretched)
+    fur: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='furFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.2 0.02' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23furFilter)' opacity='0.4'/%3E%3C/svg%3E")`,
+    
+    // Wood - Vertical Grain
+    wood: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='woodFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.005 0.05' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23woodFilter)' opacity='0.45'/%3E%3C/svg%3E")`,
+    
+    // Water - Smooth Swirls
+    water: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='waterFilter'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.015' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23waterFilter)' opacity='0.4'/%3E%3C/svg%3E")`,
+    
+    // Fabric - Fine Grid/Canvas
+    fabric: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='fabricFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.5' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23fabricFilter)' opacity='0.2'/%3E%3C/svg%3E")`,
+    
+    // Plant - Organic/Cellular-ish (Soft Noise)
+    plant: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='plantFilter'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.05' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23plantFilter)' opacity='0.35'/%3E%3C/svg%3E")`,
+
+    // Metal - Brushed
+    metal: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='metalFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 0.4' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23metalFilter)' opacity='0.3'/%3E%3C/svg%3E")`,
+};
+
+const getTextureForCard = (textureType?: string) => {
+    if (!textureType || !TEXTURE_STYLES[textureType]) {
+        return TEXTURE_STYLES.stone; // Fallback
+    }
+    return TEXTURE_STYLES[textureType];
+};
 
 // Helper for dynamic font size based on word length
 const getFontSize = (text: string) => {
@@ -132,7 +160,7 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
                 type="text"
                 value={inputWord}
                 onChange={(e) => setInputWord(e.target.value)}
-                placeholder="Ex: Flâner"
+                placeholder="Ex: Chat"
                 className="w-full text-3xl font-bold px-5 py-5 bg-white border-2 border-gray-200 focus:border-black focus:ring-4 focus:ring-gray-100 text-gray-900 rounded-2xl outline-none transition-all placeholder:text-gray-300 shadow-sm"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-black p-2 rounded-xl">
@@ -147,7 +175,7 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
             {isLoading ? (
               <>
                 <Icons.Sparkles className="animate-spin" size={20} />
-                <span>Génération magique...</span>
+                <span>Analyse de la texture...</span>
               </>
             ) : (
               "Créer la carte"
@@ -180,7 +208,6 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Directly call the parent handler. The parent will handle the logic.
     onDelete(card.id);
   };
 
@@ -212,7 +239,6 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
              <Icons.ChevronRight className="rotate-180" size={22} />
          </button>
          
-         {/* Updated Delete Button: Red to be visible and distinct */}
          <button 
             type="button"
             onClick={handleDelete} 
@@ -230,6 +256,11 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
             <div className="flex flex-col items-start gap-4">
                 <div className="flex items-center gap-3">
                     {getGenderBadge()}
+                    {card.texture && (
+                        <span className="text-xs uppercase font-bold px-2 py-1 rounded-full bg-gray-200 text-gray-600">
+                             Texture: {card.texture}
+                        </span>
+                    )}
                 </div>
                 
                 <div className="flex flex-col gap-2 w-full">
@@ -354,16 +385,9 @@ export default function App() {
   };
 
   const handleDeleteCard = (id: string) => {
-    // NOTE: Removed window.confirm to fix unresponsiveness in certain environments.
-    // The visual cues (Red trash icon) act as enough warning for now.
-    
-    // 1. Immediately exit detail view if the deleted card is the current one.
-    // This is critical to prevent rendering a null card.
     if (selectedCardId === id) {
         setSelectedCardId(null);
     }
-
-    // 2. Update the cards list
     setCards(prevCards => {
         const updatedCards = prevCards.filter(c => c.id !== id);
         saveCards(updatedCards);
@@ -381,14 +405,9 @@ export default function App() {
     await playPronunciation(word);
   };
 
-  // Render Content based on state
   const renderContent = () => {
-    // Determine the active card object
     const activeCard = selectedCardId ? cards.find(c => c.id === selectedCardId) : null;
 
-    // If selectedCardId is set BUT the card doesn't exist (e.g., was just deleted),
-    // we fall back to the List View by not rendering WordDetailView.
-    // This prevents the "blank screen" or "no reaction" issue.
     if (selectedCardId && activeCard) {
       return (
         <WordDetailView 
@@ -423,7 +442,6 @@ export default function App() {
                 </Button>
            </div>
            
-           {/* Quick Add Bar */}
            <div className="relative group mb-2">
                <div 
                  onClick={() => setIsModalOpen(true)}
@@ -439,7 +457,6 @@ export default function App() {
                </button>
            </div>
            
-           {/* Search */}
            {cards.length > 5 && (
              <div className="pt-2">
                  <input 
@@ -465,6 +482,8 @@ export default function App() {
                  {displayedCards.map(card => {
                      const theme = getThemeForId(card.id);
                      const fontSizeClass = getFontSize(card.french);
+                     // Dynamic Texture URL
+                     const textureUrl = getTextureForCard(card.texture);
                      
                      return (
                      <div 
@@ -472,10 +491,9 @@ export default function App() {
                         onClick={() => !isEditing && setSelectedCardId(card.id)}
                         className={`relative w-full aspect-square rounded-[2rem] p-4 shadow-sm transition-all cursor-pointer overflow-hidden ${theme.bg} ${!isEditing ? 'active:scale-[0.98]' : ''} flex flex-col items-center justify-between text-center`}
                      >
-                        {/* Noise Texture */}
-                        <div className="absolute inset-0 pointer-events-none mix-blend-overlay" style={{ backgroundImage: NOISE_TEXTURE }}></div>
+                        {/* Dynamic Context-Aware Texture */}
+                        <div className="absolute inset-0 pointer-events-none mix-blend-overlay" style={{ backgroundImage: textureUrl }}></div>
                         
-                        {/* Delete Button (Edit Mode) */}
                         {isEditing && (
                             <button 
                                 onClick={(e) => {
@@ -488,21 +506,17 @@ export default function App() {
                             </button>
                         )}
 
-                        {/* Card Content Layer */}
                         <div className="relative z-10 w-full h-full flex flex-col items-center justify-between">
                             
-                            {/* Main Content Area: French + Chinese grouped together */}
                             <div className="flex-1 flex flex-col items-center justify-center w-full gap-1">
                                 <h3 className={`${fontSizeClass} font-black text-white drop-shadow-md tracking-tighter break-words w-full px-1`}>
                                     {card.french}
                                 </h3>
-                                {/* Chinese Translation - Bolder and Larger */}
                                 <p className="text-lg text-white font-bold drop-shadow-md line-clamp-1 opacity-90">
                                     {card.translation}
                                 </p>
                             </div>
 
-                            {/* Bottom Audio Pill */}
                             <div className="w-full flex justify-center pb-1">
                                 <button 
                                     onClick={(e) => handleListPlay(e, card.french)}
@@ -532,7 +546,6 @@ export default function App() {
           {renderContent()}
         </div>
 
-        {/* Bottom Navigation */}
         {!selectedCardId && (
           <nav className="absolute bottom-0 w-full bg-white/80 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-around items-center h-24 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
             <button 
