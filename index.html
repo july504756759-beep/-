@@ -7,15 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       /* iOS-like font stack and smooth scrolling */
-      body {
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent web-like bounce */
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background-color: #F2F2F7; /* iOS System Grouped Background */
-        /* Prevent elastic scrolling on the body to keep the app-like feel */
-        overscroll-behavior-y: none; 
       }
       
+      #root {
+        height: 100%;
+        width: 100%;
+      }
+
       /* Remove tap highlight on iOS */
       * {
         -webkit-tap-highlight-color: transparent;

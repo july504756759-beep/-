@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Icons } from './components/Icon';
 import { AppView, WordCard } from './types';
@@ -143,9 +142,14 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity pointer-events-auto" onClick={onClose} />
-      {/* Added safe area padding to bottom for iPhone Home Indicator */}
-      <div className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 pb-safe sm:pb-6 shadow-2xl transform transition-transform pointer-events-auto flex flex-col gap-6">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity pointer-events-auto" onClick={onClose} />
+      {/* iOS Sheet Style: Rounded Top, Handle Bar, Safe Area Bottom */}
+      <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 pb-safe shadow-2xl transform transition-transform pointer-events-auto flex flex-col gap-6 animate-in slide-in-from-bottom duration-300">
+        
+        {/* Pull Handle for iOS feel */}
+        <div className="w-full flex justify-center -mt-2">
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+        </div>
         
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Ajouter un mot</h2>
@@ -172,18 +176,19 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
 
           {error && <p className="text-red-500 text-sm px-1">{error}</p>}
 
-          <Button type="submit" variant="primary" className="w-full mt-2 py-4 text-lg" disabled={isLoading || !inputWord.trim()}>
+          <Button type="submit" variant="primary" className="w-full mt-2 py-4 text-lg mb-2" disabled={isLoading || !inputWord.trim()}>
             {isLoading ? (
               <>
                 <Icons.Sparkles className="animate-spin" size={20} />
-                <span>Analyse de la texture...</span>
+                <span>Analyse...</span>
               </>
             ) : (
               "Créer la carte"
             )}
           </Button>
         </form>
-        <div className="h-4 sm:h-0"></div> 
+        {/* Extra padding for safe area logic ensures button isn't too close to home indicator */}
+        <div className="h-4"></div> 
       </div>
     </div>
   );
@@ -235,23 +240,24 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA]">
       {/* Navbar - Safe Area Top */}
-      <div className="pt-safe px-4 py-4 flex items-center justify-between sticky top-0 z-20 bg-[#FAFAFA]/90 backdrop-blur-md">
-         <button onClick={onBack} className="w-10 h-10 bg-white border border-gray-200 rounded-full shadow-sm flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors">
-             <Icons.ChevronRight className="rotate-180" size={22} />
+      <div className="pt-safe px-4 py-3 flex items-center justify-between sticky top-0 z-20 bg-[#FAFAFA]/85 backdrop-blur-xl border-b border-gray-200/30">
+         {/* Apple Style Back Button */}
+         <button onClick={onBack} className="w-11 h-11 bg-white border border-gray-200 rounded-full shadow-sm flex items-center justify-center text-gray-900 hover:bg-gray-50 active:bg-gray-100 transition-colors">
+             <Icons.ChevronRight className="rotate-180 ml-[-2px]" size={24} />
          </button>
          
          <button 
             type="button"
             onClick={handleDelete} 
-            className="w-10 h-10 bg-white border border-red-100 rounded-full shadow-sm flex items-center justify-center text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all active:scale-95"
+            className="w-11 h-11 bg-white border border-red-100 rounded-full shadow-sm flex items-center justify-center text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all active:scale-95"
             aria-label="Supprimer le mot"
          >
-             <Icons.Trash size={20} />
+             <Icons.Trash size={22} />
          </button>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-safe">
-        <div className="px-8 pb-12 max-w-lg mx-auto w-full flex flex-col gap-8 pt-4">
+        <div className="px-6 pb-12 max-w-lg mx-auto w-full flex flex-col gap-8 pt-6">
             
             {/* Header Section */}
             <div className="flex flex-col items-start gap-4">
@@ -259,14 +265,14 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
                     {getGenderBadge()}
                     {card.texture && (
                         <span className="text-xs uppercase font-bold px-2 py-1 rounded-full bg-gray-200 text-gray-600">
-                             Texture: {card.texture}
+                             {card.texture}
                         </span>
                     )}
                 </div>
                 
                 <div className="flex flex-col gap-2 w-full">
                      <h1 
-                        className="text-6xl sm:text-7xl font-black text-gray-900 tracking-tight leading-none cursor-pointer active:scale-95 transition-transform break-words"
+                        className="text-6xl sm:text-7xl font-black text-gray-900 tracking-tighter leading-none cursor-pointer active:scale-95 transition-transform break-words"
                         onClick={handlePlay}
                      >
                         {card.french}
@@ -288,7 +294,7 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
                 <div className="w-full h-px bg-gray-100 my-2"></div>
 
                 <div>
-                    <h2 className="text-4xl font-bold text-gray-900 leading-tight mb-2">
+                    <h2 className="text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
                         {card.translation}
                     </h2>
                     <p className="text-xl text-gray-500 font-medium leading-relaxed">
@@ -305,9 +311,9 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
                     </h3>
                     <button 
                         onClick={handlePlayExample}
-                        className="p-2 bg-gray-50 rounded-full text-gray-900 hover:bg-gray-100 transition-colors"
+                        className="p-2.5 bg-gray-50 rounded-full text-gray-900 hover:bg-gray-100 active:scale-90 transition-all"
                     >
-                        <Icons.Speaker size={18} className={isPlayingExample ? 'animate-pulse text-blue-600' : ''} />
+                        <Icons.Speaker size={20} className={isPlayingExample ? 'animate-pulse text-blue-600' : ''} />
                     </button>
                  </div>
                  <div>
@@ -330,17 +336,17 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
             )}
             
             {/* Secondary Delete Action */}
-            <div className="flex justify-center mt-4 mb-8">
+            <div className="flex justify-center mt-6 mb-12">
                 <button
                     onClick={handleDelete}
-                    className="text-red-400 text-sm font-semibold hover:text-red-600 transition-colors flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-red-50"
+                    className="text-red-400 text-sm font-semibold hover:text-red-600 transition-colors flex items-center gap-2 px-6 py-3 rounded-xl hover:bg-red-50 active:bg-red-100"
                 >
-                    <Icons.Trash size={16} />
+                    <Icons.Trash size={18} />
                     Supprimer cette carte
                 </button>
             </div>
             
-            <div className="h-8"></div>
+            <div className="h-12"></div>
         </div>
       </div>
     </div>
@@ -386,9 +392,11 @@ export default function App() {
   };
 
   const handleDeleteCard = (id: string) => {
+    // If the deleted card is the currently open one, close it immediately
     if (selectedCardId === id) {
         setSelectedCardId(null);
     }
+    // Update state safely
     setCards(prevCards => {
         const updatedCards = prevCards.filter(c => c.id !== id);
         saveCards(updatedCards);
@@ -425,10 +433,10 @@ export default function App() {
 
     return (
       <div className="flex flex-col h-full bg-[#F2F4F7]">
-        {/* Header - Safe Area Top added */}
-        <header className="sticky top-0 z-10 bg-[#F2F4F7]/95 backdrop-blur-md pt-safe px-6 pb-2 border-b border-gray-200/50">
+        {/* Header - Safe Area Top added - Lighter Glass */}
+        <header className="sticky top-0 z-10 bg-[#F2F4F7]/85 backdrop-blur-xl pt-safe px-6 pb-3 border-b border-gray-200/50">
            {/* Added extra padding for status bar spacing */}
-           <div className="pt-2 flex justify-between items-center mb-4">
+           <div className="pt-2 flex justify-between items-center mb-3">
                 <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg rotate-3">
                       <span className="font-serif italic font-bold text-2xl">L</span>
@@ -438,35 +446,30 @@ export default function App() {
                 <Button 
                     variant="ghost" 
                     onClick={() => setIsEditing(!isEditing)}
-                    className="text-gray-500 font-medium"
+                    className="text-blue-600 font-semibold text-lg hover:bg-gray-200/50"
                 >
-                    {isEditing ? 'Terminé' : 'Modifier'}
+                    {isEditing ? 'OK' : 'Modifier'}
                 </Button>
            </div>
            
            <div className="relative group mb-2">
                <div 
                  onClick={() => setIsModalOpen(true)}
-                 className="bg-white rounded-2xl h-14 shadow-sm border border-gray-200 flex items-center px-4 cursor-text active:scale-[0.99] transition-transform"
+                 className="bg-[#E3E3E8] rounded-xl h-12 flex items-center px-4 cursor-text active:scale-[0.99] transition-transform"
                >
-                   <span className="text-gray-400 font-medium text-lg truncate">Ajouter un nouveau mot...</span>
+                   <Icons.Plus size={20} className="text-gray-500 mr-2" />
+                   <span className="text-gray-500 font-medium text-lg truncate">Ajouter un mot...</span>
                </div>
-               <button 
-                 onClick={() => setIsModalOpen(true)}
-                 className="absolute right-2 top-2 bottom-2 aspect-square bg-black rounded-xl flex items-center justify-center text-white shadow-md shadow-gray-400"
-               >
-                   <Icons.Plus size={24} />
-               </button>
            </div>
            
            {cards.length > 5 && (
-             <div className="pt-2">
+             <div className="pt-1">
                  <input 
                     type="text" 
-                    placeholder="Rechercher..." 
+                    placeholder="Rechercher" 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-200/60 rounded-xl px-4 py-3 text-base focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all"
+                    className="w-full bg-[#E3E3E8] rounded-xl px-4 py-2.5 text-base focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-500"
                  />
              </div>
            )}
@@ -491,7 +494,7 @@ export default function App() {
                      <div 
                         key={card.id}
                         onClick={() => !isEditing && setSelectedCardId(card.id)}
-                        className={`relative w-full aspect-square rounded-[2rem] p-4 shadow-sm transition-all cursor-pointer overflow-hidden ${theme.bg} ${!isEditing ? 'active:scale-[0.98]' : ''} flex flex-col items-center justify-between text-center`}
+                        className={`relative w-full aspect-square rounded-[2rem] p-3 shadow-sm transition-all cursor-pointer overflow-hidden ${theme.bg} ${!isEditing ? 'active:scale-[0.96]' : ''} flex flex-col items-center justify-between text-center select-none`}
                      >
                         {/* Dynamic Context-Aware Texture */}
                         <div className="absolute inset-0 pointer-events-none mix-blend-overlay" style={{ backgroundImage: textureUrl }}></div>
@@ -502,19 +505,19 @@ export default function App() {
                                     e.stopPropagation();
                                     handleDeleteCard(card.id);
                                 }}
-                                className="absolute top-1 right-1 z-20 w-8 h-8 flex items-center justify-center bg-white/90 text-red-500 rounded-full shadow-sm hover:scale-110 transition-transform"
+                                className="absolute top-2 right-2 z-20 w-8 h-8 flex items-center justify-center bg-gray-100 text-red-500 rounded-full shadow-md hover:scale-110 transition-transform animate-in zoom-in duration-200"
                             >
-                                <Icons.Minus size={18} />
+                                <Icons.Minus size={20} />
                             </button>
                         )}
 
-                        <div className="relative z-10 w-full h-full flex flex-col items-center justify-between">
+                        <div className={`relative z-10 w-full h-full flex flex-col items-center justify-between ${isEditing ? 'opacity-60 scale-95' : ''} transition-all`}>
                             
-                            <div className="flex-1 flex flex-col items-center justify-center w-full gap-1">
-                                <h3 className={`${fontSizeClass} font-black text-white drop-shadow-md tracking-tighter break-words w-full px-1`}>
+                            <div className="flex-1 flex flex-col items-center justify-center w-full gap-0.5 mt-2">
+                                <h3 className={`${fontSizeClass} font-black text-white drop-shadow-md tracking-tighter break-words w-full px-1 leading-[0.9]`}>
                                     {card.french}
                                 </h3>
-                                <p className="text-lg text-white font-bold drop-shadow-md line-clamp-1 opacity-90">
+                                <p className="text-base text-white/90 font-bold drop-shadow-md line-clamp-1 mt-1">
                                     {card.translation}
                                 </p>
                             </div>
@@ -522,12 +525,12 @@ export default function App() {
                             <div className="w-full flex justify-center pb-1">
                                 <button 
                                     onClick={(e) => handleListPlay(e, card.french)}
-                                    className="bg-white/25 hover:bg-white/35 active:scale-95 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center justify-center gap-2 transition-all group"
+                                    className="bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center justify-center gap-1.5 transition-all group"
                                 >
                                     {card.phonetic && (
-                                        <span className="text-white/95 font-mono text-xs font-semibold tracking-wide group-hover:text-white">/{card.phonetic}/</span>
+                                        <span className="text-white/95 font-mono text-[10px] font-semibold tracking-wide group-hover:text-white">/{card.phonetic}/</span>
                                     )}
-                                    <Icons.Speaker size={14} className="text-white fill-white/20" />
+                                    <Icons.Speaker size={12} className="text-white fill-white/20" />
                                 </button>
                             </div>
                         </div>
@@ -542,7 +545,7 @@ export default function App() {
 
   return (
     // Updated container: uses h-[100dvh] for Safari mobile fix
-    <main className="h-[100dvh] w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden flex flex-col">
+    <main className="h-[100dvh] w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden flex flex-col select-none">
         <div className="w-full h-full bg-[#F2F4F7] flex flex-col relative overflow-hidden">
         
         <div className="flex-1 overflow-hidden relative">
@@ -550,21 +553,21 @@ export default function App() {
         </div>
 
         {!selectedCardId && (
-          // Navigation - Safe Area Bottom added
-          <nav className="absolute bottom-0 w-full bg-white/80 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-around items-center h-[calc(60px+env(safe-area-inset-bottom))] z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+          // Navigation - Safe Area Bottom added - Standard iOS Tab Bar Height (49px + safe area)
+          <nav className="absolute bottom-0 w-full bg-white/85 backdrop-blur-xl border-t border-gray-300/50 pb-safe px-6 flex justify-around items-end h-[calc(55px+env(safe-area-inset-bottom))] z-30">
             <button 
               onClick={() => setView(AppView.HOME)}
-              className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 w-20 ${view === AppView.HOME ? 'text-black bg-gray-100 scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center justify-center gap-1 h-full w-20 pb-2 ${view === AppView.HOME ? 'text-blue-600' : 'text-gray-400'}`}
             >
-              <Icons.Book size={26} strokeWidth={view === AppView.HOME ? 2.5 : 2} />
-              <span className="text-[11px] font-bold tracking-wide">Mots</span>
+              <Icons.Book size={28} strokeWidth={view === AppView.HOME ? 2.5 : 2} />
+              <span className="text-[10px] font-medium tracking-wide">Mots</span>
             </button>
             <button 
               onClick={() => setView(AppView.REVIEW)}
-              className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 w-20 ${view === AppView.REVIEW ? 'text-black bg-gray-100 scale-105' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center justify-center gap-1 h-full w-20 pb-2 ${view === AppView.REVIEW ? 'text-blue-600' : 'text-gray-400'}`}
             >
-              <Icons.Calendar size={26} strokeWidth={view === AppView.REVIEW ? 2.5 : 2} />
-              <span className="text-[11px] font-bold tracking-wide">Révision</span>
+              <Icons.Calendar size={28} strokeWidth={view === AppView.REVIEW ? 2.5 : 2} />
+              <span className="text-[10px] font-medium tracking-wide">Révision</span>
             </button>
           </nav>
         )}
