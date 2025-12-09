@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Lumière Français</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,7 +12,15 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background-color: #F2F2F7; /* iOS System Grouped Background */
+        /* Prevent elastic scrolling on the body to keep the app-like feel */
+        overscroll-behavior-y: none; 
       }
+      
+      /* Remove tap highlight on iOS */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+
       /* Hide scrollbar for cleaner look in cards */
       .no-scrollbar::-webkit-scrollbar {
         display: none;
@@ -20,6 +28,14 @@
       .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
+      }
+
+      /* Safe Area Utilities if Tailwind doesn't catch them */
+      .pt-safe {
+        padding-top: env(safe-area-inset-top);
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
       }
     </style>
   <script type="importmap">

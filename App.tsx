@@ -144,7 +144,8 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity pointer-events-auto" onClick={onClose} />
-      <div className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl transform transition-transform pointer-events-auto flex flex-col gap-6">
+      {/* Added safe area padding to bottom for iPhone Home Indicator */}
+      <div className="bg-white w-full max-w-md sm:rounded-3xl rounded-t-3xl p-6 pb-safe sm:pb-6 shadow-2xl transform transition-transform pointer-events-auto flex flex-col gap-6">
         
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Ajouter un mot</h2>
@@ -233,8 +234,8 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
 
   return (
     <div className="flex flex-col h-full bg-[#FAFAFA]">
-      {/* Navbar */}
-      <div className="px-4 py-4 flex items-center justify-between sticky top-0 z-20 bg-[#FAFAFA]/90 backdrop-blur-md">
+      {/* Navbar - Safe Area Top */}
+      <div className="pt-safe px-4 py-4 flex items-center justify-between sticky top-0 z-20 bg-[#FAFAFA]/90 backdrop-blur-md">
          <button onClick={onBack} className="w-10 h-10 bg-white border border-gray-200 rounded-full shadow-sm flex items-center justify-center text-gray-900 hover:bg-gray-50 transition-colors">
              <Icons.ChevronRight className="rotate-180" size={22} />
          </button>
@@ -249,7 +250,7 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
          </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-safe">
         <div className="px-8 pb-12 max-w-lg mx-auto w-full flex flex-col gap-8 pt-4">
             
             {/* Header Section */}
@@ -265,7 +266,7 @@ const WordDetailView = ({ card, onBack, onDelete }: { card: WordCard, onBack: ()
                 
                 <div className="flex flex-col gap-2 w-full">
                      <h1 
-                        className="text-6xl sm:text-7xl font-black text-gray-900 tracking-tight leading-none cursor-pointer active:scale-95 transition-transform"
+                        className="text-6xl sm:text-7xl font-black text-gray-900 tracking-tight leading-none cursor-pointer active:scale-95 transition-transform break-words"
                         onClick={handlePlay}
                      >
                         {card.french}
@@ -424,9 +425,10 @@ export default function App() {
 
     return (
       <div className="flex flex-col h-full bg-[#F2F4F7]">
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-[#F2F4F7]/95 backdrop-blur-md pt-6 pb-2 px-6 border-b border-gray-200/50">
-           <div className="flex justify-between items-center mb-4">
+        {/* Header - Safe Area Top added */}
+        <header className="sticky top-0 z-10 bg-[#F2F4F7]/95 backdrop-blur-md pt-safe px-6 pb-2 border-b border-gray-200/50">
+           {/* Added extra padding for status bar spacing */}
+           <div className="pt-2 flex justify-between items-center mb-4">
                 <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg rotate-3">
                       <span className="font-serif italic font-bold text-2xl">L</span>
@@ -471,7 +473,7 @@ export default function App() {
         </header>
 
         {/* List - Card Feed */}
-        <div className="flex-1 overflow-y-auto px-4 pb-24 pt-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto px-4 pt-4 no-scrollbar pb-32">
           {displayedCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center p-8 opacity-50">
               <Icons.Book size={48} className="text-gray-300 mb-4" />
@@ -539,7 +541,8 @@ export default function App() {
   };
 
   return (
-    <main className="h-screen w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden">
+    // Updated container: uses h-[100dvh] for Safari mobile fix
+    <main className="h-[100dvh] w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden flex flex-col">
         <div className="w-full h-full bg-[#F2F4F7] flex flex-col relative overflow-hidden">
         
         <div className="flex-1 overflow-hidden relative">
@@ -547,7 +550,8 @@ export default function App() {
         </div>
 
         {!selectedCardId && (
-          <nav className="absolute bottom-0 w-full bg-white/80 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-around items-center h-24 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+          // Navigation - Safe Area Bottom added
+          <nav className="absolute bottom-0 w-full bg-white/80 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-around items-center h-[calc(60px+env(safe-area-inset-bottom))] z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
             <button 
               onClick={() => setView(AppView.HOME)}
               className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl transition-all duration-300 w-20 ${view === AppView.HOME ? 'text-black bg-gray-100 scale-105' : 'text-gray-400 hover:text-gray-600'}`}
