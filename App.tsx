@@ -69,10 +69,17 @@ const getTextureForCard = (textureType?: string) => {
 
 // Helper for dynamic font size based on word length
 const getFontSize = (text: string) => {
-  if (text.length <= 4) return 'text-6xl sm:text-7xl leading-none';
-  if (text.length <= 8) return 'text-5xl sm:text-6xl leading-none';
-  if (text.length <= 12) return 'text-4xl sm:text-5xl leading-tight';
-  return 'text-3xl sm:text-4xl leading-tight';
+  const len = text.length;
+  // Short words (chat, eau)
+  if (len <= 4) return 'text-5xl sm:text-6xl';
+  // Medium words (maison)
+  if (len <= 7) return 'text-4xl sm:text-5xl';
+  // Long words (boulangerie)
+  if (len <= 10) return 'text-3xl sm:text-4xl';
+  // Very long words (extraordinaire)
+  if (len <= 13) return 'text-2xl sm:text-3xl';
+  // Sentences/Phrases
+  return 'text-xl sm:text-2xl';
 };
 
 // --- Components ---
@@ -602,11 +609,11 @@ export default function App() {
 
                         <div className={`relative z-10 w-full h-full flex flex-col items-center justify-between ${isEditing ? 'opacity-60 scale-95' : ''} transition-all`}>
                             
-                            <div className="flex-1 flex flex-col items-center justify-center w-full gap-0.5 mt-2">
-                                <h3 className={`${fontSizeClass} font-black text-white drop-shadow-md tracking-tighter break-words w-full px-1 leading-[0.9]`}>
+                            <div className="flex-1 flex flex-col items-center justify-center w-full gap-0.5 mt-2 overflow-hidden">
+                                <h3 className={`${fontSizeClass} font-black text-white drop-shadow-md tracking-tighter w-full px-1 leading-none break-words whitespace-normal`}>
                                     {card.french}
                                 </h3>
-                                <p className="text-base text-white/90 font-bold drop-shadow-md line-clamp-1 mt-1">
+                                <p className="text-lg font-bold text-white/90 drop-shadow-md line-clamp-1 mt-1">
                                     {card.translation}
                                 </p>
                             </div>
