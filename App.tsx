@@ -108,6 +108,60 @@ const Button = ({ onClick, children, className, variant = 'primary', disabled = 
 
 // --- Views ---
 
+const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+    const [apiKey, setApiKey] = useState('');
+    const [saved, setSaved] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setApiKey(localStorage.getItem('user_gemini_api_key') || '');
+            setSaved(false);
+        }
+    }, [isOpen]);
+
+    const handleSave = () => {
+        localStorage.setItem('user_gemini_api_key', apiKey.trim());
+        setSaved(true);
+        setTimeout(() => {
+            onClose();
+        }, 800);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative z-10 animate-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">Paramètres</h2>
+                    <Button variant="icon" onClick={onClose}><Icons.Close size={24} /></Button>
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Gemini API Key</label>
+                        <input 
+                            type="password" 
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="Entrez votre clé API..."
+                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-black outline-none"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                           Nécessaire pour générer les cartes. Clé stockée localement.
+                        </p>
+                    </div>
+                    
+                    <Button onClick={handleSave} disabled={!apiKey.trim()} className={saved ? 'bg-green-600' : ''}>
+                        {saved ? 'Enregistré !' : 'Enregistrer'}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () => void, onSave: (word: string) => Promise<void> }) => {
   const [inputWord, setInputWord] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -130,9 +184,13 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
     try {
       await onSave(inputWord);
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      if (err.message === 'MISSING_API_KEY') {
+          setError("Clé API manquante. Veuillez la configurer dans les paramètres.");
+      } else {
+          setError("Une erreur est survenue. Vérifiez votre connexion.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +232,7 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm px-1">{error}</p>}
+          {error && <p className="text-red-500 text-sm px-1 font-medium">{error}</p>}
 
           <Button type="submit" variant="primary" className="w-full mt-2 py-4 text-lg mb-2" disabled={isLoading || !inputWord.trim()}>
             {isLoading ? (
@@ -359,6 +417,7 @@ export default function App() {
   const [view, setView] = useState<AppView>(AppView.HOME);
   const [cards, setCards] = useState<WordCard[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -437,19 +496,31 @@ export default function App() {
         <header className="sticky top-0 z-10 bg-[#F2F4F7]/85 backdrop-blur-xl pt-safe px-6 pb-3 border-b border-gray-200/50">
            {/* Added extra padding for status bar spacing */}
            <div className="pt-2 flex justify-between items-center mb-3">
-                <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                   <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg rotate-3">
-                      <span className="font-serif italic font-bold text-2xl">L</span>
-                   </div>
-                   Lumière
-                </h1>
-                <Button 
-                    variant="ghost" 
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="text-blue-600 font-semibold text-lg hover:bg-gray-200/50"
-                >
-                    {isEditing ? 'OK' : 'Modifier'}
-                </Button>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white shadow-lg rotate-3">
+                        <span className="font-serif italic font-bold text-2xl">L</span>
+                    </div>
+                    Lumière
+                    </h1>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    <Button 
+                        variant="icon" 
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="text-gray-500 hover:text-black hover:bg-white"
+                    >
+                        <Icons.Settings size={24} />
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => setIsEditing(!isEditing)}
+                        className="text-blue-600 font-semibold text-lg hover:bg-gray-200/50"
+                    >
+                        {isEditing ? 'OK' : 'Modifier'}
+                    </Button>
+                </div>
            </div>
            
            <div className="relative group mb-2">
@@ -481,6 +552,7 @@ export default function App() {
             <div className="flex flex-col items-center justify-center h-64 text-center p-8 opacity-50">
               <Icons.Book size={48} className="text-gray-300 mb-4" />
               <p className="text-gray-500 font-medium">Votre collection est vide</p>
+              <p className="text-gray-400 text-sm mt-2">Appuyez sur + pour commencer</p>
             </div>
           ) : (
              <div className="grid grid-cols-2 min-[450px]:grid-cols-3 sm:grid-cols-4 gap-3">
@@ -576,6 +648,11 @@ export default function App() {
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSaveWord} 
+        />
+        
+        <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
         />
         
       </div>

@@ -1,13 +1,36 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { GeminiWordResponse } from "../types";
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+// Helper to safely get the API Key from Storage (User Input) or Env (Build time)
+const getApiKey = (): string => {
+  // 1. Try Local Storage (User entered via Settings)
+  const storedKey = localStorage.getItem('user_gemini_api_key');
+  if (storedKey) return storedKey;
+
+  // 2. Try Environment Variable (Safe check for browser)
+  try {
+    // @ts-ignore - process might not exist in pure browser env without polyfills
+    if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+      // @ts-ignore
+      return process.env.API_KEY;
+    }
+  } catch (e) {
+    // Ignore error if process is undefined
+  }
+
+  return '';
+};
 
 // --- Text Generation ---
 
 export const generateWordDetails = async (word: string): Promise<GeminiWordResponse> => {
-  if (!apiKey) throw new Error("API Key is missing");
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("MISSING_API_KEY");
+  }
+
+  // Initialize client dynamically with the current key
+  const ai = new GoogleGenAI({ apiKey });
 
   const prompt = `
     You are a professional French language teacher.

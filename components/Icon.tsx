@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Plus, Volume2, Calendar, ChevronRight, X, Sparkles, Trash2, Clock, CircleMinus } from 'lucide-react';
+import { BookOpen, Plus, Volume2, Calendar, ChevronRight, X, Sparkles, Trash2, Clock, CircleMinus, Settings } from 'lucide-react';
 
 export const Icons = {
   Book: BookOpen,
@@ -11,5 +11,6 @@ export const Icons = {
   Sparkles: Sparkles,
   Trash: Trash2,
   Clock: Clock,
-  Minus: CircleMinus
+  Minus: CircleMinus,
+  Settings: Settings
 };
