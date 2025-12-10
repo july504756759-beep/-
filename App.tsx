@@ -90,7 +90,7 @@ const Button = ({ onClick, children, className, variant = 'primary', disabled = 
   const baseStyle = "rounded-xl font-semibold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2";
   const variants = {
     primary: "bg-black text-white shadow-lg disabled:bg-gray-400 px-6 py-3",
-    secondary: "bg-white text-gray-900 border border-gray-200 shadow-sm disabled:bg-gray-50 disabled:text-gray-400 px-6 py-3",
+    secondary: "bg-white text-gray-900 border border-gray-200 shadow-sm disabled:bg-gray-50 disabled:text-gray-400 px-6 py-3 hover:bg-gray-50",
     ghost: "bg-transparent text-gray-600 hover:bg-gray-100 disabled:text-gray-400 px-2 py-1",
     icon: "p-2 rounded-full hover:bg-gray-100 text-gray-600"
   };
@@ -148,8 +148,9 @@ const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
                             placeholder="Entrez votre clé API..."
                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:ring-2 focus:ring-black outline-none"
                         />
-                        <p className="text-xs text-gray-500 mt-2">
-                           Nécessaire pour générer les cartes. Clé stockée localement.
+                        <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                           Nécessaire pour générer les cartes avec l'IA. <br/>
+                           Vous pouvez obtenir une clé gratuite sur <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Google AI Studio</a>.
                         </p>
                     </div>
                     
@@ -162,7 +163,7 @@ const SettingsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => vo
     );
 };
 
-const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () => void, onSave: (word: string) => Promise<void> }) => {
+const AddWordModal = ({ isOpen, onClose, onSave, onOpenSettings }: { isOpen: boolean, onClose: () => void, onSave: (word: string) => Promise<void>, onOpenSettings: () => void }) => {
   const [inputWord, setInputWord] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +233,23 @@ const AddWordModal = ({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: (
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm px-1 font-medium">{error}</p>}
+          {error && (
+              <div className="flex flex-col gap-3 bg-red-50 p-4 rounded-xl border border-red-100">
+                  <p className="text-red-600 text-sm font-medium">{error}</p>
+                  {error.includes("Clé API") && (
+                      <Button 
+                        onClick={(e) => { 
+                            e?.preventDefault(); 
+                            onOpenSettings(); 
+                        }} 
+                        variant="secondary" 
+                        className="py-2 text-sm w-full bg-white text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                          Configurer maintenant
+                      </Button>
+                  )}
+              </div>
+          )}
 
           <Button type="submit" variant="primary" className="w-full mt-2 py-4 text-lg mb-2" disabled={isLoading || !inputWord.trim()}>
             {isLoading ? (
@@ -648,6 +665,7 @@ export default function App() {
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           onSave={handleSaveWord} 
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
         
         <SettingsModal
