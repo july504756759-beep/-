@@ -7,12 +7,23 @@ import { generateWordDetails, playPronunciation } from './services/geminiService
 const STORAGE_KEY = 'lumiere_french_cards_v3';
 
 const saveCards = (cards: WordCard[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  } catch (error) {
+    // Fail silently or warn console if storage is full, 
+    // ensuring the app doesn't crash and user can continue adding in-memory.
+    console.warn("LocalStorage quota exceeded or error saving cards:", error);
+  }
 };
 
 const loadCards = (): WordCard[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error("Failed to load cards", e);
+    return [];
+  }
 };
 
 // --- Helpers for Theming ---
@@ -515,7 +526,7 @@ export default function App() {
         : filteredCards;
 
     return (
-      <div className="flex flex-col h-full bg-[#F2F4F7]">
+      <div className="flex flex-col h-full bg-[#F2F4F7] min-h-0">
         {/* Header - Safe Area Top added - Lighter Glass */}
         <header className="sticky top-0 z-10 bg-[#F2F4F7]/85 backdrop-blur-xl pt-safe px-6 pb-3 border-b border-gray-200/50">
            {/* Added extra padding for status bar spacing */}
@@ -571,7 +582,7 @@ export default function App() {
         </header>
 
         {/* List - Card Feed */}
-        <div className="flex-1 overflow-y-auto px-4 pt-4 no-scrollbar pb-32">
+        <div className="flex-1 overflow-y-auto px-4 pt-4 no-scrollbar pb-32 min-h-0">
           {displayedCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center p-8 opacity-50">
               <Icons.Book size={48} className="text-gray-300 mb-4" />
@@ -641,10 +652,10 @@ export default function App() {
 
   return (
     // Updated container: uses h-[100dvh] for Safari mobile fix
-    <main className="h-[100dvh] w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden flex flex-col select-none">
-        <div className="w-full h-full bg-[#F2F4F7] flex flex-col relative overflow-hidden">
+    <main className="fixed inset-0 h-[100dvh] w-full bg-[#F2F4F7] text-gray-900 antialiased overflow-hidden flex flex-col select-none">
+        <div className="w-full h-full bg-[#F2F4F7] flex flex-col relative overflow-hidden min-h-0">
         
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative min-h-0">
           {renderContent()}
         </div>
 
